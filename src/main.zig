@@ -2,9 +2,14 @@ const std = @import("std");
 const b64 = @import("struct/b64.zig");
 
 pub fn main() !void {
-    const str = "Hello world";
+    const Base64 = b64.Base64.init();
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    const res = try b64.Base64.init().encode(str, gpa.allocator());
-    std.debug.print("{s}", .{res});
-    defer gpa.allocator().free(res);
+    const alloc = gpa.allocator();
+    // const str: []const u8 = "Aello world";
+    const estr = "VGVzdGluZyBzb21lIG1vcmUgc2hpdA==";
+    const t = try Base64.decode(estr, alloc);
+    std.debug.print("{s}\n", .{t});
+    for (t) |c| {
+        std.debug.print("{d} | ", .{c});
+    }
 }
