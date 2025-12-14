@@ -97,7 +97,6 @@ pub const Base64 = struct {
         var focus = [4]u8{ 0, 0, 0, 0 };
         var offset: usize = 0;
         var count: u8 = 0;
-        std.mem.copyForwards(u8, buf, "0");
 
         for (0..encoded_input.len) |i| {
             buf[i] = try self.char_index(encoded_input[i]);
@@ -111,19 +110,20 @@ pub const Base64 = struct {
                 out_buffer[offset] = (focus[0] << 2) + (focus[1] >> 4);
                 offset += 1;
 
-                if (focus[2] != self._ignored_char_in_b64) {
-                    out_buffer[offset] = (focus[1] << 4) + (focus[2] >> 2);
-                    offset += 1;
+                out_buffer[offset] = (focus[1] << 4) + (focus[2] >> 2);
+                offset += 1;
+
+                if (focus[2] == self._ignored_char_in_b64) {
+                    return out_buffer[0..offset];
                 }
 
-                if (focus[3] != self._ignored_char_in_b64) {
-                    out_buffer[offset] = (focus[2] << 6) + (focus[3]);
-                    offset += 1;
-                }
+                out_buffer[offset] = (focus[2] << 6) + (focus[3]);
+                offset += 1;
+
                 count = 0;
             }
         }
 
-        return out_buffer;
+        return std.mem.trim(u8, out_buffer, " ");
     }
 };
